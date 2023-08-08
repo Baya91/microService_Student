@@ -1,5 +1,6 @@
 package com.school.studentservice.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -32,7 +33,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 
-public class Student {
+public class Student implements Serializable {
 	
 	//@Column(name = "_")
 	@Id

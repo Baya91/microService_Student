@@ -1,343 +1,381 @@
 
 
+<ng-container *ngIf="apiResponseAllStudents | async as dataAllStudent">
+  <!--====================================================================================================================================-->
+  <!-- ___ Laoding page ___ -->
+  <ng-container *ngIf="dataAllStudent.appState === 'APP_LOADING'">
+    <div class="laoudinPAge">
+      <button class="btn btn-primary loading-container" type="button">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Loading...
+      </button>
+    </div>
+  </ng-container>
+  <!-- ____ Fin Laoding page ____ -->
 
+  <div class="col-lg-10 container">
+    <!--====================================================================================================================================-->
+    <!-- ___ btn insert Student ___ -->
+    <div>
+      <h1 class="text-center text-primary mt-5">Student List</h1>
+      <!-- btn -->
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#save_Modal"
+        (click)="open_modal_update_save_delete('Save')" class="btn btn-primary float-right mb-2">
+        <i class="fas fa-plus"></i> add Student
+      </button>
+      <!-- Fin btn -->
+    </div>
+    <!-- Fin btn insert Student  -->
+    <!--====================================================================================================================================-->
+    <!-- ___ Table ___ -->
+    <ng-container *ngIf="dataAllStudent.appState === 'APP_LOADED'">
+      <div style="width: 100%; height: 716px" class="h-100 p-0 mb-4 d-flex justify-content-center align-items-center">
+        <table class="table table-striped bg-light text-center justify-content-center centered-table"
+          style="width: 100%">
+          <thead>
+            <tr>
+              <th scope="col">id</th>
+              <th scope="col">name</th>
+              <th scope="col">lastname</th>
+              <th scope="col">email</th>
+              <th scope="col">image</th>
+              <th scope="col">genre</th>
+              <th scope="col">gestion Student</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of dataAllStudent.appData.data.page.content">
+              <th scope="row">{{ item.id }}</th>
+              <td>{{ item.name }}</td>
+              <td>{{ item.lastName }}</td>
+              <td>{{ item.email }}</td>
+              <td>
+                <div class="d-flex justify-content-center">
+                  <div style="width: 50px; height: 50px" class="rounded-circle">
+                    <img src="{{ item.imageUrl }}" alt="img student" width="100%" height="100%"
+                      class="rounded-circle" />
+                  </div>
+                  <div style="width: 50px; height: 50px" class="rounded-circle mx-2">
+                    <img src="{{ item.image }}" alt="img student" width="100%" height="100%" class="rounded-circle" />
+                  </div>
+                </div>
+              </td>
+              <td class="text-white">
+                <span [ngClass]="[
+                    item.genre == 'ACTIVE' ? ' badge bg-success  p-1' : '',
+                    item.genre == 'PENDING' ? ' badge bg-primary ' : '',
+                    item.genre == 'BANNED' ? ' badge bg-warning ' : ''
+                  ]">
+                  {{ item.genre }}
+                </span>
+              </td>
 
+              <td>
+                <!-- _____ button Delete Update student _____ -->
+                <!--===================================================================-->
+                <!--show-->
 
+                <button class="border-0" (click)="findStudentById(item?.id)" data-target="#showModal"
+                  data-toggle="modal">
+                  <span style="font-size: 25px; color: black" class="mr-3 cursor-pointer">
+                    <i class="fas fa-search-plus"></i>
+                  </span>
+                </button>
+                <!--===================================================================-->
+                <!--delete-->
+                <button class="badge px-3 py-1 text-white border-0 bg-danger" data-toggle="modal"
+                  data-target="#ConfirmModal" (click)="open_modal_update_save_delete('Delete', item.id)">
+                  delete
+                </button>
+                <!--===================================================================-->
+                <!--update-->
+                <button class="badge bg-success px-3 py-1 text-white border-0 ml-3"
+                  (click)="open_modal_update_save_delete('Update', item.id)" data-toggle="modal"
+                  data-target="#update_Modal">
+                  update
+                </button>
 
+                <!-- _____ Fin Delete Update student _____ -->
+                <!--====================================================================================================================================-->
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+    <!--  Fin Table  -->
 
-<!-- ___ Laoding page ___ -->
-<ng-container *ngIf=" apiResponse.data.page.content.length < 0">
-  <div class="laoudinPAge">
-    <button class="btn btn-primary loading-container" type="button">
-      <span
-        class="spinner-border spinner-border-sm"
-        role="status"
-        aria-hidden="true"
-      ></span>
-      Loading...
-    </button>
+    <!--====================================================================================================================================-->
+    <!-- ___ pagination ___ -->
+    <div class="">
+      <nav aria-label="Page navigation example ">
+        <ul class="pagination justify-content-center">
+          <li class="page-item">
+            <a class="page-link" aria-label="Previous" [ngClass]="(currentPage | async) == 0 ? ' disabled' : ' '"
+              (click)="next_previous_Page('previous')">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          <li class="page-item" *ngFor="
+              let item of [].constructor(
+                dataAllStudent.appData?.data.page.totalPages
+              );
+              let i = index
+            ">
+            <a class="page-link" [ngClass]="(currentPage | async) == i ? ' active' : ' '"
+              (click)="getAllStudent(this.txtSearch, i)">{{ i + 1 }}</a>
+          </li>
+
+          <li class="page-item">
+            <a class="page-link" [ngClass]="
+                (currentPage | async) ==
+                  dataAllStudent.appData?.data.page.totalPages - 1 ||
+                (currentPage | async) ==
+                  dataAllStudent.appData?.data.page.totalPages
+                  ? ' disabled'
+                  : ' '
+              " aria-label="Next" (click)="next_previous_Page('next')">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <!--  Fin pagination  -->
+
+    <!--====================================================================================================================================-->
   </div>
-</ng-container>
-<!-- ____ Fin Laoding page ____ -->
 
+  <!--====================================================================================================================================-->
+  <!-- ____________________________________________ modal ____________________________________________ -->
 
-<div class="col-lg-10 container">
-
-
-  <!-- ___ btn insert Student ___ -->
-  <div>
-    <h1 class="text-center text-primary mt-5">Student List</h1>
-    <!-- btn -->
-  <button
-    type="button"
-    class="btn btn-primary"
-    data-toggle="modal"
-    (click)="open_modal_update_save_delete('Save')"
-    data-target="#update_save_Modal"
-    class="btn btn-primary float-right mb-2"
-  >
-  <i class="fas fa-plus"></i>  add Student
-  </button>
-<!-- Fin btn -->
-  </div>
- <!-- Fin btn insert Student  -->
-
-
-
-  <!-- ___ Table ___ -->
-  <div style="width: 100%;  height: 716px;  " class=" h-100 p-0 mb-4 d-flex justify-content-center align-items-center">
-    <table
-      class="table table-striped bg-light text-center justify-content-center  centered-table "
-      style=" width: 100%"
-    >
-      <thead>
-        <tr>
-          <th scope="col">id</th>
-          <th scope="col">name</th>
-          <th scope="col">lastname</th>
-          <th scope="col">email</th>
-          <th scope="col">image</th>
-          <th scope="col">genre</th>
-          <th scope="col">gestion Student</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of apiResponse.data.page.content">
-          <th scope="row">{{ item.id }}</th>
-          <td>{{ item.name }}</td>
-          <td>{{ item.lastName }}</td>
-          <td>{{ item.email }}</td>
-          <td>
-            <img
-              src="{{ item.imageUrl }}"
-              alt="img student"
-              width="40"
-              sizes="40"
-              class="rounded-circle"
-            />
-          </td>
-          <td class="text-white">
-            <span
-              [ngClass]="[
-                item.genre == 'ACTIVE' ? ' badge bg-success  p-1' : '',
-                item.genre == 'PENDING' ? ' badge bg-primary ' : '',
-                item.genre == 'BANNED' ? ' badge bg-warning ' : ''
-              ]"
-            >
-              {{ item.genre }}
-            </span>
-          </td>
-
-          <td>
-            <!-- _____ button Delete Update student _____ -->
-
-               <!--show--> 
-            
-               <button class=" border-0 "
-               (click)="findStudentById(item?.id)"
-               data-target="#showModal" data-toggle="modal" >
- <span style="font-size: 25px; color: black; " class="mr-3 cursor-pointer">
-                 <i class="fas fa-search-plus " ></i>
-               </span>
-              </button>
-          
-            <!--delete-->
-            <button
-              class="badge px-3 py-1 text-white border-0 bg-danger"
-              data-toggle="modal"
-              data-target="#ConfirmModal"
-              (click)="open_modal_update_save_delete('Delete',item.id)"
-            >
-              delete
-            </button>
-            <!--update-->
-            <button
-              class="badge bg-success px-3 py-1 text-white border-0 ml-3"
-              (click)="open_modal_update_save_delete('Update', item.id)"
-              data-toggle="modal"
-              data-target="#update_save_Modal"
-            >
-              update
-            </button>
-
-          
-            <!-- _____ Fin Delete Update student _____ -->
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
- <!--  Fin Table  -->
-
-
-
-
-<!-- ___ pagination ___ -->
-<div class="">
-<nav aria-label="Page navigation example ">
-  <ul class="pagination justify-content-center">
-    <li class="page-item">
-      <a class="page-link" href="#" aria-label="Previous" (click)="next_previous_Page(this.txtSearch,'previous',indexPage)">
-        <span aria-hidden="true">&laquo;</span>
-      </a>
-    </li>
-    <li class="page-item" *ngFor="let item of [].constructor(apiResponse.data.page.totalPages) ; let i =index">
-      
-      <a class="page-link" href="#" (click)="getAllStudent(this.txtSearch,i)">{{i+1}}</a>
-    
-    </li>
-    
-    <li class="page-item">
-      <a class="page-link" href="#" aria-label="Next" (click)="next_previous_Page(this.txtSearch,'next',indexPage)">
-        <span aria-hidden="true">&raquo;</span>
-      </a>
-    </li>
-  </ul>
-</nav>
-</div>
-<!--  Fin pagination  -->
-
-
-
-</div>
-
-
-
-<!-- ___ modal save Student ___ -->
-
-<!--Form save Student-->
-<form
-  #formSaveStudent="ngForm"
-  (submit)="save_and_update_Student(formSaveStudent, student?.id)"
->
-  <!-- Modal -->
-  <div
-    class="modal fade"
-    id="update_save_Modal"
-    data-backdrop="static"
-    data-keyboard="false"
-    tabindex="-1"
-    aria-labelledby="exampleModalLabel"
-    aria-hidden="true"
-  >
+  <!--Form save Student-->
+  <div class="modal fade" id="save_Modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="width: 900px">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title d-block text-center" id="exampleModalLabel">
             {{ typeModal }} Student
           </h5>
-          <button
-            type="button"
-            class="close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <div class="form-group">
-            <label for="exampleInputEmail1">Name</label>
-            <input
-              type="text"
-              name="name"
-              ngModel="{{ student?.name }}"
-              class="form-control"
-              placeholder=""
-            />
-          </div>
+          <form #formSaveStudent="ngForm" (submit)="save_and_update_Student(formSaveStudent)">
+            <div class="form-group">
+              <label for="exampleInputEmail1">Name</label>
+              <input type="text" name="name" ngModel class="form-control" placeholder="" />
+            </div>
 
-          <div class="form-group">
-            <label for="exampleInputEmail1">lastName</label>
-            <input
-              type="text"
-              name="lastName"
-              ngModel="{{ student?.lastName }}"
-              class="form-control"
-              placeholder="Entre lastName student"
-            />
-          </div>
+            <div class="form-group">
+              <label for="exampleInputEmail1">lastName</label>
+              <input type="text" name="lastName" ngModel class="form-control" placeholder="Entre lastName student" />
+            </div>
 
-          <div class="form-group">
-            <label for="exampleInputEmail1">Email</label>
-            <input
-              type="email"
-              name="email"
-              ngModel="{{ student?.email }}"
-              class="form-control"
-              placeholder="Entre email student"
-            />
-          </div>
+            <div class="form-group">
+              <label for="exampleInputEmail1">Email</label>
+              <input type="email" name="email" ngModel class="form-control" placeholder="Entre email student" />
+            </div>
 
-          <div class="form-group">
-            <label for="exampleInputEmail1">image</label>
-            <input
-              type="file"
-              name="image"
-              ngModel
-              class="form-control"
-              placeholder="Entre name image"
-            />
-          </div>
+            <div class="form-group">
+              <label for="exampleInputEmail1">image</label>
+              <input type="file" name="image" ngModel class="form-control" placeholder="Entre name image" />
+            </div>
 
-          <div class="form-group">
-            <label for="exampleInputEmail1">imageUrl</label>
-            <input
-              type="text"
-              name="imageUrl"
-              ngModel="{{ student?.imageUrl }}"
-              class="form-control"
-              placeholder="Entre imageUrl Student "
-              value="https://randomuser.me/api/portraits/men/1.jpg"
-            />
-          </div>
+            <div class="form-group">
+              <label for="exampleInputEmail1">imageUrl</label>
+              <input type="text" name="imageUrl" ngModel class="form-control" placeholder="Entre imageUrl Student "
+                value="https://randomuser.me/api/portraits/men/1.jpg" />
+            </div>
 
-          <select
-            class="form-control form-control-sm"
-            ngModel="{{ student?.genre }}"
-            name="genre"
-            id="genreSelect"
-          >
-            <option value="ACTIVE" selected>ACTIVE</option>
-            <option value="BANNED">BANNED</option>
-            <option value="PENDING">PENDING</option>
-          </select>
-
-          <!--Fin Form save Student-->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary"  data-dismiss="modal" id="close_form">
-            Close
-          </button>
-          <button type="submit" class="btn btn-primary">{{ typeModal }}</button>
+            <select class="form-control form-control-sm" ngModel name="genre" id="genreSelect">
+              <option value="ACTIVE" selected>ACTIVE</option>
+              <option value="BANNED">BANNED</option>
+              <option value="PENDING">PENDING</option>
+            </select>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal" id="close_form_save">
+                Close
+              </button>
+              <button type="reset" hidden id="resetForSave"></button>
+              <button type="submit" class="btn btn-primary">
+                {{ typeModal }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
-</form>
-<!-- ____ Fin Form save Student ____ -->
+  <!-- ____ Fin Form save Student ____ -->
 
+  <!--====================================================================================================================================-->
+  <ng-container *ngIf="apiResponseStudent$ | async as dataStudent">
+    <!--Form update Student-->
 
+    <div class="modal fade" id="update_Modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+      aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" style="width: 900px">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title d-block text-center" id="exampleModalLabel">
+              {{ typeModal }} Student
+            </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form #formUpdateStudent="ngForm" (submit)="
+                save_and_update_Student(
+                  formUpdateStudent,
+                  dataStudent.appData?.id
+                )
+              " enctype="multipart/form-data">
+              <div class="form-group">
+                <div style="width: 100%" class="d-flex justify-content-center">
+                  <img src="{{ dataStudent.appData?.image }}" #imgForm width="300" height="300" class="rounded-circle"
+                    alt="" />
+                </div>
 
-<!-- ___ Delete Student ___ -->
-<div
-  class="modal fade"
-  id="ConfirmModal"
-  tabindex="-1"
-  aria-labelledby="exampleModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">{{typeModal}} Student</h5>
-        <button
-          type="button"
-          class="close"
-          data-dismiss="modal"
-          aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">delete student : {{student?.name}} {{student?.lastName}}</div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="close_modal_delete">
-          Close
-        </button>
-        <button type="button" class="btn btn-danger" (click)="deleteStudent(student)">{{typeModal}}</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- ____ Fin Delete Student ____ -->
+                <label for="exampleInputEmail1">image</label>
+                <input type="file" class="form-control" placeholder="Entre name image"
+                  accept="image/png, image/gif, image/jpeg,image/webp" (change)="showEvent($event, imgForm)" />
+              </div>
 
+              <div class="form-group">
+                <label for="exampleInputEmail1">Name</label>
+                <input type="text" name="name" ngModel="{{ dataStudent.appData?.name }}" class="form-control"
+                  placeholder="" />
+              </div>
 
+              <div class="form-group">
+                <label for="exampleInputEmail1">lastName</label>
+                <input type="text" name="lastName" ngModel="{{ dataStudent.appData?.lastName }}" class="form-control"
+                  placeholder="Entre lastName student" />
+              </div>
 
+              <div class="form-group">
+                <label for="exampleInputEmail1">Email</label>
+                <input type="email" name="email" ngModel="{{ dataStudent.appData?.email }}" class="form-control"
+                  placeholder="Entre email student" />
+              </div>
 
-<!-- ___ show Student ___ -->
-<div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" style="min-width: 500px; max-height: 500px;">
-    <div class="modal-content">
-      <div class="card p-4 border-0">
-        <img src={{student?.imageUrl}}  class="card-img-top" style="border-radius: 10%;" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">Name & lastName : {{student?.name}} {{student?.lastName}}</h5>
-          <h5 class="card-title">Id: {{student?.id}} </h5> 
-           <h5 class="card-title">Email: {{student?.email}}</h5> 
-          <h5 class="card-title">Genre: {{student?.genre}}</h5>
-          <h5 class="card-title">Date created: {{student?.dateCreated  | date: 'medium'}}</h5>
-          <h5 class="card-title">Date created: {{student?.dateCreated  | date: 'shortDate'}}</h5>
-      <h5 class="card-title">Date created: {{student?.dateCreated  | date: 'dd/MM/yyyy'}}</h5>
-      <h5 class="card-title">Date created: {{student?.dateCreated  | date: 'hh:mm:ss'}}</h5>
-      <h5 class="card-title">Date created: {{student?.dateCreated  | date: 'hh:mm'}}</h5>
+              <div class="form-group">
+                <label for="exampleInputEmail1">imageUrl</label>
+                <input type="text" name="imageUrl" ngModel="{{ dataStudent.appData?.imageUrl }}" class="form-control"
+                  placeholder="Entre imageUrl Student " value="https://randomuser.me/api/portraits/men/1.jpg" />
+              </div>
+
+              <select class="form-control form-control-sm" ngModel="{{ dataStudent.appData?.genre }}" name="genre"
+                id="genreSelect">
+                <option value="ACTIVE" selected>ACTIVE</option>
+                <option value="BANNED">BANNED</option>
+                <option value="PENDING">PENDING</option>
+              </select>
+
+              <!--Fin Form save Student-->
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="close_form_update">
+                  Close
+                </button>
+                <button type="reset" hidden id="resetFormUpdate"></button>
+                <button type="submit" class="btn btn-primary">
+                  {{ typeModal }}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        
+    </div>
+    <!-- ____ Fin Form update Student ____ -->
+
+    <!--====================================================================================================================================-->
+
+    <!-- ___ Delete Student ___ -->
+    <div class="modal fade" id="ConfirmModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">
+              {{ typeModal }} Student
+            </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            delete student : {{ dataStudent.appData?.name }}
+            {{ dataStudent.appData?.lastName }}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" id="close_modal_delete">
+              Close
+            </button>
+            <button type="button" class="btn btn-danger" (click)="deleteStudent(dataStudent.appData)">
+              {{ typeModal }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
-<!-- ____ Fin show Student ____ -->
+    <!-- ____ Fin Delete Student ____ -->
+
+    <!--====================================================================================================================================-->
+
+    <!-- ___ show Student ___ -->
+    <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" style="min-width: 500px; max-height: 500px">
+        <div class="modal-content">
+          <div class="card p-4 border-0">
+            <img src="{{ dataStudent.appData?.image }}" class="card-img-top" style="border-radius: 10%" alt="..." />
+            <div class="card-body">
+              <h5 class="card-title">
+                Name & lastName : {{ dataStudent.appData?.name }}
+                {{ dataStudent.appData?.lastName }}
+              </h5>
+              <h5 class="card-title">Id: {{ dataStudent.appData?.id }}</h5>
+              <h5 class="card-title">
+                Email: {{ dataStudent.appData?.email }}
+              </h5>
+              <h5 class="card-title">
+                Genre: {{ dataStudent.appData?.genre }}
+              </h5>
+              <h5 class="card-title">
+                Date created:
+                {{ dataStudent.appData?.dateCreated | date : "medium" }}
+              </h5>
+              <h5 class="card-title">
+                Date created:
+                {{ dataStudent.appData?.dateCreated | date : "shortDate" }}
+              </h5>
+              <h5 class="card-title">
+                Date created:
+                {{ dataStudent.appData?.dateCreated | date : "dd/MM/yyyy" }}
+              </h5>
+              <h5 class="card-title">
+                Date created:
+                {{ dataStudent.appData?.dateCreated | date : "hh:mm:ss" }}
+              </h5>
+              <h5 class="card-title">
+                Date created:
+                {{ dataStudent.appData?.dateCreated | date : "hh:mm" }}
+              </h5>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ____ Fin show Student ____ -->
+  </ng-container>
+
+  <!-- ___Fin modal ___ -->
+</ng-container>

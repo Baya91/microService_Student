@@ -16,4 +16,26 @@
    
   }
 
+  .disabled{
+    
+     
+      pointer-events: none; 
+      cursor: not-allowed; 
+      background: rgba(58, 57, 57, 0.247);
+      color: rgb(0, 0, 0);
+    
+  }
+  .active{
+    background-color: #007bff!important;
+    color: white;pointer-events: none; 
+      cursor: not-allowed; 
+  }
+  .page-item a {
+    margin: 0px 2px;
+    border: 0;
+    cursor: pointer;
+   
+    border-radius: 50%;
+    
+  }
   
