@@ -31,6 +31,7 @@
             ],
             "scripts": [
               "src/assets/js/cdn.jsdelivr.net_npm_jquery@3.5.1_dist_jquery.slim.min.js",
+              "src/assets/js/code.jquery.com_jquery-3.5.1.js",
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
               
             ]

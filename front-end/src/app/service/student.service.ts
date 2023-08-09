@@ -26,13 +26,29 @@ export class StudentService {
      this.http.get<any>(`${this.baseUrl}/find_all?txt=${txt}&page=${page}&size=${size}`);
 
 
-  saveStudent$=(student:Student):Observable<ApiResponse_<Student>>=>
-     this.http.post<any>(`${this.baseUrl}/save`,student);
+  saveStudent$=(student:Student,file:File):Observable<ApiResponse_<Student>>=>
+  {
+  if(file==null){
+    student.image=null
+   return  this.http.post<any>(`${this.baseUrl}/save`,student);
+  }else{ 
+  student.image=null;
+ const data= this.buildFormData(student,file);
+   return  this.http.post<any>(`${this.baseUrl}/save_with_image`,data)
+  }
+
+  }
+      
+  
+  
+  
+  
+ 
     
-//////////////////////////////////////////////////////////////////
+
   updateStudent$=(student:Student , file: File):Observable<ApiResponse_<Student>>=>{
   if(file==null){
- 
+
    return  this.http.put<any>(`${this.baseUrl}/update`,student)
   }else{
  const data= this.buildFormData(student,file);
@@ -42,14 +58,7 @@ export class StudentService {
   }
     
 
-//////////////////////////////////////////////////////////
-  
 
-
-/** 
-updateStudent$=(student:Student):Observable<ApiResponse_<Student>>=>
-     this.http.put<any>(`${this.baseUrl}/update`,student)
-    */
   deleteStudent$=(id:number):Observable<ApiResponse_<Student>>=>
      this.http.delete<any>(`${this.baseUrl}/delete?id=${id}`);
 
@@ -59,13 +68,15 @@ updateStudent$=(student:Student):Observable<ApiResponse_<Student>>=>
 //////////////////////////////////////////////////////////
 public buildFormData(student_: Student , file: File){
    const formData = new FormData();
-   formData.append('id', student_.id.toString());
-   formData.append('name', student_.name);
-   formData.append('lastName', student_.lastName);
-   formData.append('email', student_.email);
-   formData.append('imageUrl', student_.imageUrl);
-   formData.append('genre', student_.genre);
-   formData.append('image',file);
+   student_?.id!=null ? formData.append('id', student_?.id.toString()):"";
+   formData.append('name', student_?.name);
+   formData.append('lastName', student_?.lastName);
+   formData.append('email', student_?.email);
+   formData.append('imageUrl', student_?.imageUrl);
+   console.log(student_?.imageUrl);
+   
+   formData.append('genre', student_?.genre);
+   formData.append('file',file);
    return formData;
  }
 }
