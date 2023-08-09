@@ -21,44 +21,42 @@ import { StudentService } from 'src/app/service/student.service';
   styleUrls: ['./student.component.css'],
 })
 export class StudentComponent implements OnInit {
- 
- 
- 
-
   //variable
 
-  apiResponseAllStudents: Observable<{
-    appData?: ApiResponse_<Student>;
-    appState: string;
-    error?: HttpErrorResponse;
-  }>;
 
-  apiResponseStudent$: Observable<{
-    appData?: Student;
-    appState: string;
-    error?: HttpErrorResponse;
-  }>;
+ 
+  allStudent:Student[]
+  appStateAllStudent:string
 
-  currentPageSubj = new BehaviorSubject<number>(0);
-  currentPage = this.currentPageSubj.asObservable();
+
+  student:Student|any
+  appStateStudent:string
+
+  currentPage :number=0;
 
   txtSearch: string = '';
   typeModal: string;
 
-  typeImage:string[]=["image/png", "image/gif", "image/jpeg","image/webp","image/jpg"]
-  typeGenre:string[]=["BANNED", "PENDING", "ACTIVE"]
+totalPages:number=0
+
+  typeImage: string[] = [
+    'image/png',
+    'image/gif',
+    'image/jpeg',
+    'image/webp',
+    'image/jpg',
+  ];
+  typeGenre: string[] = ['BANNED', 'PENDING', 'ACTIVE'];
   selectedImage: any = null;
+formSaveStudent_: FormGroup;
 
-  //// validation
 
-  formSaveStudent_: FormGroup;
+  
 
   constructor(
     private studentService: StudentService,
     private activateRouter: ActivatedRoute,
-    private fb: FormBuilder,
-   
-    
+    private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
@@ -66,8 +64,6 @@ export class StudentComponent implements OnInit {
       this.testInputSearch(), this.validationForm(null);
     });
   }
-
-
 
   testInputSearch() {
     let result = this.activateRouter.snapshot.paramMap.has('alfa');
@@ -78,105 +74,93 @@ export class StudentComponent implements OnInit {
     this.getAllStudent(this.txtSearch);
   }
 
-
-
-
-
-
-
-
-
   getAllStudent(txt?: string, page?: number, size?: number) {
-    this.apiResponseAllStudents = this.studentService
+  
+     this.studentService
       .getStudentByTxt$(txt, page, size)
       .pipe(
         map((data: ApiResponse_<Student>) => {
-          this.currentPageSubj.next(data.data.page.number);
-         
+          this.currentPage=data.data.page.number;
+          this.totalPages=data.data.page.totalPages;
 
-          return {
-            appData: this.convertBytToImage(data),
-            appState: 'APP_LOADED',
-          };
+this.allStudent=data.data.page.content
+this.appStateAllStudent='APP_LOADED';
+
+          
         }),
-        startWith({ appState: 'APP_LOADING' }),
+        startWith( this.appStateAllStudent='APP_LOADING' ),
         catchError((error: HttpErrorResponse) =>
-          of({ appState: "'APP_ERROR'", error })
+          of( this.appStateAllStudent="'APP_ERROR'", error )
         )
-      );
+      ).subscribe();
   }
 
-  convertBytToImage(dataApi: ApiResponse_<Student>): ApiResponse_<Student> {
-    dataApi.data.page.content.map((data: any) => {
-      data.image = 'data:image/jpeg;base64,' + data.image;
-    });
-    return dataApi;
+  convertBytToImage(dataApi: ApiResponse_<Student>): Student[]{
+   let i:number=0
+
+    return dataApi.data.page.content;
   }
 
   next_previous_Page(deriction: string) {
     let index =
       deriction === 'next'
-        ? this.currentPageSubj.value + 1
-        : this.currentPageSubj.value - 1;
+        ? ++this.currentPage 
+        : --this.currentPage ;
     this.getAllStudent(this.txtSearch, index);
   }
-  student: any;
+
   findStudentById(id: number) {
-   this.selectedImage=null
-    this.apiResponseStudent$ = this.studentService.getStudentById$(id).pipe(
+    this.selectedImage = null;
+     this.studentService.getStudentById$(id).pipe(
       map((data: ApiResponse_<Student>) => {
         this.student = data.data.page;
-        const dbImage = 'data:image/jpeg;base64,' + this.student.image;
-        this.student.imageConvert = dbImage;
-        console.log(this.student);
         
-        this.validationForm(this.student);
-        return { appData: this.student, appState: 'APP_LOADED' };
+       this.validationForm(this.student);
+       this.appStateStudent= 'APP_LOADED' 
+       this.showToast( this.appStateStudent )
       }),
-      startWith({ appState: 'APP_LOADED' }),
+      startWith( this.appStateStudent='APP_LOADING' ,this.showToast( this.appStateStudent ) ),
       catchError((error: HttpErrorResponse) =>
-        of({ appState: "'APP_ERROR'", error })
+        of(this.appStateStudent='APP_ERROR',this.showToast( this.appStateStudent ) ,this.showToast('APP_ERROR')  )
       )
-    );
+    ).subscribe();
+    
   }
 
   open_modal_update_save_delete(typeModal_: string, id?: number) {
-    this.validationForm("")
-    
-    id != null ? this.findStudentById(id) :'';
+    this.validationForm(null);
+
+    id != null ? this.findStudentById(id) : '';
     this.typeModal = typeModal_;
   }
 
   gestionImg(
-    $event: Event, 
+    $event: Event,
     inputFile: HTMLInputElement,
     inputImage: HTMLImageElement
   ) {
     this.selectedImage = (<HTMLInputElement>event.target).files[0];
 
+    if (
+      this.selectedImage.size < 612000 &&
+      this.typeImage.indexOf(this.selectedImage.type) > -1
+    ) {
+      inputImage.src = URL.createObjectURL(this.selectedImage);
 
-    if (this.selectedImage.size < 612000 &&  this.typeImage.indexOf((this.selectedImage.type))>-1) {
-      
-        inputImage.src = URL.createObjectURL(this.selectedImage);
- 
       //formgroup.controls['image'].setValue = this.selectedImage;
-    
     } else {
-    this.selectedImage = null;
-    
+      this.selectedImage = null;
     }
   }
 
-  validationForm(std: any) {
-    console.log("data ",std);
-    
+
+
+  validationForm(std:any) {
+   
+   
     this.formSaveStudent_ = this.fb.group({
-      id: [
-        std?.id
-      ], 
-      imageUrl: [
-        std?.imageUrl
-      ],
+      id: [std?.id],
+      imageUrl: [std?.imageUrl],
       name: [
         std?.name,
         [
@@ -195,7 +179,7 @@ export class StudentComponent implements OnInit {
           Validators.pattern('^[a-zA-Z]+$'),
         ],
       ],
-      image: [std?.imageConvert],
+      image: ['data:image/jpeg;base64,'+std?.image],
       email: [
         std?.email,
         [
@@ -207,99 +191,104 @@ export class StudentComponent implements OnInit {
       ],
       genre: [std?.genre, [Validators.required]],
     });
+  }
+
+  get name() {
+    return this.formSaveStudent_.get('name');
+  }
+  get lastName() {
+    return this.formSaveStudent_.get('lastName');
+  }
+  get image() {
+    return this.formSaveStudent_.get('image');
+  }
+
+  get email() {
+    return this.formSaveStudent_.get('email');
+  }
+
+  get genre() {
+    return this.formSaveStudent_.get('genre');
+  }
+
+  save_and_update_Student() {
    
-    
-  }
 
-get name(){ return this.formSaveStudent_.get("name")}
-get lastName(){ return  this.formSaveStudent_.get("lastName")}
-get image(){ return  this.formSaveStudent_.get("image")}
-
-get email(){ return  this.formSaveStudent_.get("email")}
-
-get genre(){ return  this.formSaveStudent_.get("genre")}
-
-
-
-
-save_and_update_Student() {
-  console.log(this.formSaveStudent_.value);
-  
-  if (confirm('ok')) {
-    if (this.typeModal === 'Save') {
-      this.studentService
-        .saveStudent$(this.formSaveStudent_.value, this.selectedImage)
-        .pipe(
-          map(() => {
-            this.showToast('APP_LOADED'), this.getAllStudent();
-          }),
-          startWith(this.showToast('APP_LOADING')),
-          catchError((error: HttpErrorResponse) =>
-            of(error, this.showToast('APP_ERROR'))
-          )
-        ).subscribe();
-    }
-    if (this.typeModal === 'Update') {
-      this.formSaveStudent_.controls['image'].setValue(this.student.image);
-      this.studentService
-        .updateStudent$(this.formSaveStudent_.value, this.selectedImage)
-        .pipe(
-          map(() => {
-            this.showToast('APP_LOADED'),
-              this.getAllStudent(this.txtSearch, this.currentPageSubj.value);
-          }),
-          startWith(this.showToast('APP_LOADING')),
-          catchError((error: HttpErrorResponse) =>
-            of(error, this.showToast('APP_ERROR'))
-          )
-        ).subscribe();;
+    if (confirm('ok')) {
+      if (this.typeModal === 'Save') {
+        this.studentService
+          .saveStudent$(this.formSaveStudent_.value, this.selectedImage)
+          .pipe(
+            map(() => {
+              this.showToast('APP_LOADED'), this.getAllStudent();
+            }),
+            startWith(this.showToast('APP_LOADING')),
+            catchError((error: HttpErrorResponse) =>
+              of(error, this.showToast('APP_ERROR'))
+            )
+          ).subscribe();
+      }
+      if (this.typeModal === 'Update') {
+        this.formSaveStudent_.controls['image'].setValue(this.student.image);
+        this.studentService
+          .updateStudent$(this.formSaveStudent_.value, this.selectedImage)
+          .pipe(
+            map(() => {
+              this.showToast('APP_LOADED'),
+                this.getAllStudent(this.txtSearch, this.currentPage);
+            }),
+            startWith(this.showToast('APP_LOADING')),
+            catchError((error: HttpErrorResponse) =>
+              of(error, this.showToast('APP_ERROR'))
+            )
+          ).subscribe();
+      }
+      this.typeModal=""
+      document.getElementById('resetForSave').click();
+      document.getElementById('close_form_save').click();
     }
   }
-}
-deleteStudent(student: Student) {
-  this.studentService
-    .deleteStudent$(student.id) .pipe(
-      map(() => {
-        this.showToast('APP_LOADED'),
-           this.getAllStudent();
-  }),
-  startWith(this.showToast('APP_LOADING')),
-  catchError((error: HttpErrorResponse) =>
-    of(error, this.showToast('APP_ERROR'))
-  )
-).subscribe();;
-  document.getElementById('close_modal_delete').click();
-}
+  deleteStudent(student: Student) {
+    this.studentService
+      .deleteStudent$(student.id)
+      .pipe(
+        map(() => {
+          this.showToast('APP_LOADED'), this.getAllStudent();
+        }),
+        startWith(this.showToast('APP_LOADING')),
+        catchError((error: HttpErrorResponse) =>
+          of(error, this.showToast('APP_ERROR'))
+        )
+      )
+      .subscribe();
+    document.getElementById('close_modal_delete').click();
+  }
 
+  hiddenTosat: boolean = true;
+  bg_toast: string;
+  stat_toast: string;
+  color_toast: string;
+  showToast(typeTosast: string) {
+    if (typeTosast == 'APP_LOADED') {
+      this.bg_toast = 'bg-success';
+      this.stat_toast = 'Successfully ';
+      this.color_toast = 'text-success';
+    }
+    if (typeTosast == 'APP_LOADING') {
+      this.bg_toast = 'bg-warning';
+      this.stat_toast = 'Warning ';
+      this.color_toast = ' text-warning';
+    }
+    if (typeTosast == 'APP_ERROR') {
+      this.bg_toast = 'bg-danger';
+      this.stat_toast = 'Error ';
+      this.color_toast = 'text-danger';
+    }
+    this.hiddenTosat = false;
 
-  
-hiddenTosat:boolean=true
-bg_toast:string
-stat_toast:string
-color_toast:string
-showToast (typeTosast:string){
-  
+    setTimeout(() => {
+      this.hiddenTosat = true;
+    }, 1500);
  
-    
-  if(typeTosast=="APP_LOADED"){
-this.bg_toast="bg-success";
-this.stat_toast="Successfully ";
-this.color_toast="text-success";
-  } if(typeTosast=="APP_LOADING"){
-    this.bg_toast="bg-warning";
-    this.stat_toast="Warning ";
-    this.color_toast=" text-warning";
-  } if(typeTosast=="APP_ERROR"){
-this.bg_toast="bg-danger";
-  this.stat_toast="Error ";
-  this.color_toast="text-danger";
   }
-  this.hiddenTosat=false
-  
-  setTimeout(() => {
-    this.hiddenTosat=true
-  }, 5000);
-  document.getElementById('resetForSave').click();
-  document.getElementById('close_form_save').click();
-}
 }
