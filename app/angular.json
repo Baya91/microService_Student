@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "front-end3": {
+    "app": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/front-end3",
+            "outputPath": "dist/app",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -24,16 +24,12 @@
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
-             
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
-              
              "src/styles.css" 
             ],
             "scripts": [
-              "src/assets/js/cdn.jsdelivr.net_npm_jquery@3.5.1_dist_jquery.slim.min.js",
-              "src/assets/js/code.jquery.com_jquery-3.5.1.js",
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
-              
+              "src/assets/js/cdn.jsdelivr.net_npm_jquery@3.5.1_dist_jquery.slim.min.js",        
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"            
             ]
           },
           "configurations": {
@@ -73,10 +69,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "front-end3:build:production"
+              "browserTarget": "app:build:production"
             },
             "development": {
-              "browserTarget": "front-end3:build:development"
+              "browserTarget": "app:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -84,7 +80,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "front-end3:build"
+            "browserTarget": "app:build"
           }
         },
         "test": {

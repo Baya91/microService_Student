@@ -1,21 +1,36 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiResponse_ } from '../model/apiResponse';
-import { Student } from '../model/student';
+
 import { environment } from 'src/environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
+import { Student } from '../model/student';
+
+//const cabecera = {headers: new HttpHeaders({'Content-TYpe': 'application/json'})};
 
 @Injectable({
   providedIn: 'root'
 })
 export class StudentService {
 
+  private baseUrl:string=`${environment.serverUrl}/api/page_student`;
 
  constructor(private http:HttpClient) { }
-
-
-  private baseUrl:string=`${environment.serverUrl}/student`;
+/*
+ public httpOptions = { 
+    headers: new HttpHeaders({
+      'Access-Control-Allow-Origin': 'http://localhost:4200',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+      'Access-Control-Allow-Headers': 'Origin, Access-Control-Allow-Origin, Content-Type,Accept, Authorization, Origin, Accept, X-Requested-With',
+      'Access-Control-Allow-Credentials': 'true'
+    })
+  };
  
+ */
+
+
+  deleteStudent$=(id:number):Observable<ApiResponse_<Student>>=>
+  this.http.delete<any>(`${this.baseUrl}/delete?id=${id}`);
 
 
   getStudentById$=(id:number):Observable<ApiResponse_<Student>>=>
@@ -27,7 +42,9 @@ export class StudentService {
 
 
   saveStudent$=(student:Student,file:File):Observable<ApiResponse_<Student>>=>
-  {
+  { 
+    
+
   if(file==null){
     student.image=null
    return  this.http.post<any>(`${this.baseUrl}/save`,student);
@@ -39,13 +56,7 @@ export class StudentService {
 
   }
       
-  
-  
-  
-  
- 
     
-
   updateStudent$=(student:Student , file: File):Observable<ApiResponse_<Student>>=>{
   if(file==null){
 
@@ -59,8 +70,7 @@ export class StudentService {
     
 
 
-  deleteStudent$=(id:number):Observable<ApiResponse_<Student>>=>
-     this.http.delete<any>(`${this.baseUrl}/delete?id=${id}`);
+  
 
 
 

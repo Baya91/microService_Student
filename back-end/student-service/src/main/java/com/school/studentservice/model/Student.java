@@ -1,6 +1,5 @@
 package com.school.studentservice.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -15,7 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import javax.validation.constraints.Size;
+//import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
 
@@ -33,7 +32,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 
-public class Student implements Serializable {
+public class Student {
 	
 	//@Column(name = "_")
 	@Id
@@ -41,19 +40,19 @@ public class Student implements Serializable {
 	@Column(name = "_id")
 	private Long id;
 	
-	@Size(min = 3,max = 30)
+	//@Size(min = 3,max = 30)
 	@Column(name = "_name")
 	private String name;
 	
-	@Size(min = 3,max = 30)
+	//@Size(min = 3,max = 30)
 	@Column(name = "_lastName")
 	private String lastName;
 	
-	@Size(min = 3,max = 90)
+	//@Size(min = 3,max = 90)
 	@Column(name = "_email",unique = true)
 	private String email;
 	 
-	@Size(min = 3,max = 10)
+	//@Size(min = 3,max = 10)
 	@Column(name = "_genre")
 	private String genre;
 	 
